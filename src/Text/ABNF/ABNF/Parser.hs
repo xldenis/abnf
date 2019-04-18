@@ -12,6 +12,7 @@ To parse documents using ABNF, see "Text.ABNF.Document.Parser"
 
 The parser you will most likely be interested in is 'rulelist'
 -}
+{-# LANGUAGE OverloadedStrings #-}
 module Text.ABNF.ABNF.Parser where
 
 import Prelude hiding (repeat)
@@ -21,9 +22,13 @@ import Data.Maybe (catMaybes)
 import qualified Data.Text as Text
 import Numeric (readInt)
 import Text.Megaparsec
-import Text.Megaparsec.Text
+import Text.Megaparsec.Char
+-- import Text.Megaparsec.Text
+import Data.Void
 
 import Text.ABNF.ABNF.Types
+
+type Parser = Parsec Void Text.Text
 
 identifier :: Parser Text.Text
 identifier = Text.pack <$> do
@@ -37,7 +42,7 @@ identifier = Text.pack <$> do
 -- @
 -- 'parse' 'rulelist'
 -- @
-parseABNF :: String -> Text.Text -> Either (ParseError Char Dec) [Rule]
+parseABNF :: String -> Text.Text -> Either (ParseErrorBundle Text.Text Void) [Rule]
 parseABNF = parse rulelist
 
 -- | The main parser, which parses a list of 'Rule's.
@@ -64,7 +69,7 @@ c_wsp = sequence [wsp] <|> (try $ do
     pure $ newl ++ [white])
 
 c_nl :: Parser String
-c_nl = comment <|> crlf
+c_nl = comment <|> (Text.unpack <$> crlf)
 
 comment :: Parser String
 comment = char ';' *> many (wsp <|> vchar) <* crlf
