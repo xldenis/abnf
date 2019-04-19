@@ -69,10 +69,10 @@ c_wsp = sequence [wsp] <|> (try $ do
     pure $ newl ++ [white])
 
 c_nl :: Parser String
-c_nl = comment <|> (Text.unpack <$> crlf)
+c_nl = comment <|> (Text.unpack <$> eol)
 
 comment :: Parser String
-comment = char ';' *> many (wsp <|> vchar) <* crlf
+comment = char ';' *> many (wsp <|> vchar) <* eol
 
 alternation :: Parser SumSpec
 alternation = (do
